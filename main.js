@@ -1,24 +1,40 @@
+let interval;
 let currMoleTile;
 let score = 0;
+let total = 0;
 let molesPeeped = 0;
-let maxMoles = 10; // Set the maximum number of moles to peep (this will peep 10 moles in total)
+let maxMoles = 10;
 let gameOver = false;
+let currentLevel = 1;
+const maxScore = 100;
 
-// this will start the game
-function startGAME() { 
-  buttonstart = document.getElementById("start"); //this is the start button
-  buttonstart.addEventListener("click", setGame);
+function startGame() { 
+  document.getElementById("start").style.display = "none";
+  setGame();
 }
 
-// 1000 milliseconds = 1 second, every 1 second it will spawn a mole in a hole
-function setGame() {
-  setInterval(setMole, 1000); 
+function setGame() { // Set up the game based on the current level
+  if (currentLevel === 1) {
+    interval = setInterval(setMole, 2500); 
+  } else if (currentLevel === 2) {
+    interval = setInterval(setMole, 2000);
+    maxMoles = 15;
+  } else if (currentLevel === 3) {
+    interval = setInterval(setMole, 1500);
+    maxMoles = 20;
+  }else if (currentLevel === 4) {
+    interval = setInterval(setMole, 1000);
+    maxMoles = 25;
+  }
+  updateDisplay(); // Display current level and score on the screen
+}
+
+function updateDisplay() { // Update the display with the current level and score
+  document.getElementById("score").innerText = "Level: " + currentLevel + " | Score: " + score;
 }
 
 let randomnum = Math.floor(Math.random() * 9);
-
-// make a new number so it will not be the same
-function getRandomTile() {
+function getRandomTile() { // make a new number so it will not be the same
   let newnum;
 
   do {
@@ -30,88 +46,119 @@ function getRandomTile() {
 }
 
 function setMole() {
-  // Check if maximum number of moles has been peeped 
-  if (gameOver || molesPeeped >= maxMoles) {
-    endGame(); // End the game (gameoverscreen)
+  if (currMoleTile) {
+    currMoleTile.innerHTML = ""; // Clear the current mole tile another mole will peep
+  }
+  if (molesPeeped == maxMoles) { // Check if the maximum number of moles has been reached (end of the game) 
+    endGame();
     return;
   }
-
-  // Clear the current mole tile another mole will peep
-  if (currMoleTile) {
-    currMoleTile.innerHTML = "";
-  }
-
-  // mole element
-  let mole = document.createElement("img");
-  mole.src = "./mole.png"; 
-
-  // random tile for the mole to peep
-  let num = getRandomTile();
-
-  // Set the current mole tile and append a ("child") the mole to it
+  let mole = document.createElement("img");  // mole element
+  mole.src = "mole.png"; 
+  let num = getRandomTile(); // random tile for the mole to peep
   currMoleTile = document.getElementById(num);
   currMoleTile.appendChild(mole);
-
-  // Add a click event listener to the mole to known if a mole is clicked
   mole.addEventListener("click", moleHit);
-
-  // Increment the count of moles peeped
-  molesPeeped++;
-
-  // Check if the maximum number of moles has been reached (end of the game) 
-  if (molesPeeped >= maxMoles) {
-    endGame();
-  }
+  molesPeeped++; // num of moles peeped
 }
 
-function moleHit() {
-  // Display a new image of a whacked mole ("a mole that's been hit")
+function moleHit() { // Display a new image of a whacked mole ("a mole that's been hit")
   currMoleTile.innerHTML = "";
   let whackedMole = document.createElement("img");
-  whackedMole.src = "./whacked-mole.png"; 
+  whackedMole.src = "whacked-mole.png"; 
   currMoleTile.appendChild(whackedMole);
-
-  // Update the score by 10 (perfect score is 100) 
-  score += 10;
+  score += 10; // Update the score by 10 
   document.getElementById("score").innerText = score.toString();
+  updateDisplay();
 }
 
 function endGame() {
-  // Check if the game is over
-  if (gameOver) {
-    return;
-  }
-
+  total += score;
   gameOver = true;
+  clearInterval(interval);  
+  if (score >= maxScore) {
+    if (currentLevel < 4) {
+      nextLevel();
+    } else {
+      winner();
+    }
+  } else {
+    playAgainGameOver();
+  }
+}
 
-  // Display game over screen after delay (2sec)
-  setTimeout(() => {
-    let gameOverScreen = document.createElement("div");
-    gameOverScreen.innerHTML = "<h1>Game Over!</h1>";
 
-    // Display the final score
-    let finalScore = document.createElement("p");
-    finalScore.innerText = "Final Score: " + score;
-    gameOverScreen.appendChild(finalScore);
+function playAgainGameOver() {  
+  
+  setTimeout(() => { // Display game over screen after delay (2sec)
+  let gameOverScreen = document.createElement("div");
+  gameOverScreen.innerHTML = "<h1>Game Over!</h1>";
 
-    // Display the number of moles peeped
-    let molesPeepedText = document.createElement("p");
-    molesPeepedText.innerText = "Moles Peeped: " + molesPeeped;
-    gameOverScreen.appendChild(molesPeepedText);
+  let finalScore = document.createElement("p"); // Display final score
+  finalScore.innerText = "Final Score: " + total;
+  gameOverScreen.appendChild(finalScore);
 
-    // Display a start button to restart the game
-    let startButton = document.createElement("button");
-    startButton.innerText = "Play Again";
-    startButton.addEventListener("click", restartGame);
-    gameOverScreen.appendChild(startButton);
+  let molesPeepedText = document.createElement("p"); // Display moles peeped count
+  molesPeepedText.innerText = "Moles Peeped: " + molesPeeped;
+  gameOverScreen.appendChild(molesPeepedText);
 
-    // Append game over screen to another container so that it will be displayed
-    document.body.appendChild(gameOverScreen);
+  let gameOverButton = document.createElement("button"); // Display a start button to restart the game
+  gameOverButton.innerText = "Play Again";
+  gameOverButton.addEventListener("click", () => {restartGame()});
+  gameOverScreen.appendChild(gameOverButton);
+
+    document.body.appendChild(gameOverScreen); // Append game over screen to another container so that it will be displayed
   }, 2000); // the delay time before the game over screen (2sec)
 }
 
-function restartGame() {
-  // Start the game again
-  // this will re-fresh the tab hehehe ;) 
+function nextLevel() {
+  currentLevel+=1
+
+  setTimeout(() => {   
+    let nextLevelScreen = document.createElement("div");
+    nextLevelScreen.innerHTML = "<h1>Next Level!</h1>";
+    
+    let totalScore = document.createElement("p");
+    totalScore.innerText = "Total Score: " + total;
+    nextLevelScreen.appendChild(totalScore);
+
+    let molesPeepedText = document.createElement("p");
+    molesPeepedText.innerText = "Moles Peeped: " + molesPeeped;
+    nextLevelScreen.appendChild(molesPeepedText);
+
+    let nextLevelButton = document.createElement("button");
+    nextLevelButton.innerText = "Play Next Level";
+    nextLevelButton.addEventListener("click", () => {
+    resetGame();
+    setGame(); 
+    document.body.removeChild(nextLevelScreen);
+    })
+    nextLevelScreen.appendChild(nextLevelButton);
+
+    document.body.appendChild(nextLevelScreen);
+    });
+    
+    currMoleTile.innerHTML = "";
+    
+}
+
+function winner() {
+  let WinnerScreen = document.createElement("div");
+  WinnerScreen.innerHTML = "<h1>YOU WON!</h1>";
+  let playAgainButton = document.createElement("button");
+  playAgainButton.innerText = "Play Again";
+  playAgainButton.addEventListener("click", restartGame);
+  WinnerScreen.appendChild(playAgainButton);
+  document.body.appendChild(WinnerScreen);
+}
+
+function resetGame() {
+  score = 0;
+  molesPeeped = 0;
+  gameOver = false;
+  currMoleTile.innerHTML = "";
+}
+
+function restartGame() { // Start the game again reload the page
   location.reload();
 }
