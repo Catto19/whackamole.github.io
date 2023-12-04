@@ -6,7 +6,7 @@ let molesPeeped = 0;
 let maxMoles = 10;
 let gameOver = false;
 let currentLevel = 1;
-const maxScore = 100;
+let maxScore;
 
 function startGame() { 
   document.getElementById("start").style.display = "none";
@@ -15,16 +15,20 @@ function startGame() {
 
 function setGame() { // Set up the game based on the current level
   if (currentLevel === 1) {
-    interval = setInterval(setMole, 2500); 
+    interval = setInterval(setMole, 2500);
+    maxScore = 100;
   } else if (currentLevel === 2) {
     interval = setInterval(setMole, 2000);
     maxMoles = 15;
+    maxScore = 150;
   } else if (currentLevel === 3) {
     interval = setInterval(setMole, 1500);
     maxMoles = 20;
+    maxScore = 200;
   }else if (currentLevel === 4) {
     interval = setInterval(setMole, 1000);
     maxMoles = 25;
+    maxScore = 250;
   }
   updateDisplay(); // Display current level and score on the screen
 }
