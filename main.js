@@ -93,6 +93,8 @@ function endGame() {
 
 
 function playAgainGameOver() {  
+  
+  setTimeout(() => { // Display game over screen after delay (2sec)
   let gameOverScreen = document.createElement("div");
   gameOverScreen.innerHTML = "<h1>Game Over!</h1>";
 
@@ -109,11 +111,14 @@ function playAgainGameOver() {
   gameOverButton.addEventListener("click", () => {restartGame()});
   gameOverScreen.appendChild(gameOverButton);
 
-  document.body.appendChild(gameOverScreen); // Append game over screen 
+    document.body.appendChild(gameOverScreen); // Append game over screen to another container so that it will be displayed
+  }, 2000); // the delay time before the game over screen (2sec)
+}
 
 function nextLevel() {
   currentLevel+=1
-  
+
+  setTimeout(() => {   
     let nextLevelScreen = document.createElement("div");
     nextLevelScreen.innerHTML = "<h1>Next Level!</h1>";
     
@@ -133,7 +138,10 @@ function nextLevel() {
     document.body.removeChild(nextLevelScreen);
     })
     nextLevelScreen.appendChild(nextLevelButton);
+
     document.body.appendChild(nextLevelScreen);
+    });
+    
     currMoleTile.innerHTML = "";
     
 }
